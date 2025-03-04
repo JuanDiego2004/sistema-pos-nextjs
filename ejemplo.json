@@ -1,0 +1,318 @@
+{
+    "productos": [
+      {
+        "id": "cm7bcl6lh00052paaq8ijk9c7",
+        "nombre": "Coca cola 250ml xd",
+        "imagen": "https://kverayzhgxugiklfqdmn.supabase.co/storage/v1/object/sign/productos/imagenes/db81b216-2fca-4142-83c7-fae03b42dff3.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJwcm9kdWN0b3MvaW1hZ2VuZXMvZGI4MWIyMTYtMmZjYS00MTQyLTgzYzctZmFlMDNiNDJkZmYzLmpwZyIsImlhdCI6MTczOTkzNTM1NywiZXhwIjoyMDU1NTAyNzE3fQ.lulIcYvUZ6TFJ6zs9gZxDtowEWvflMNDAe8Pi_Ih8r4",
+        "createdAt": "2025-02-19T03:22:37.971Z",
+        "updatedAt": "2025-02-21T01:45:58.570Z",
+        "categoriaId": "cm76veuw200002pga7bejaqug",
+        "fechaVencimiento": "2025-02-23T00:00:00.000Z",
+        "tieneIGV": false,
+        "codigoBarras": "dfd",
+        "proveedorId": "214ab466-fdc0-49c7-ae1d-8d9c102ed179",
+        "lote": "fd",
+        "estado": "activo",
+        "descripcion": null,
+        "marca": "fd",
+        "peso": null,
+        "dimensiones": null,
+        "impuestosAdicionales": 0,
+        "descuento": 0,
+        "fechaFabricacion": null,
+        "codigoInterno": "dfd",
+        "ubicacionAlmacen": null,
+        "costoAlmacenamiento": null,
+        "notas": "dfd",
+        "categoria": {
+          "id": "cm76veuw200002pga7bejaqug",
+          "nombre": "GASEOSAS"
+        },
+        "proveedor": {
+          "id": "214ab466-fdc0-49c7-ae1d-8d9c102ed179",
+          "nombre": "COCA-COLA SERVICIOS DE PERU S.A.C",
+          "ruc": "20415932376",
+          "contacto": "Claudio Llanos",
+          "telefono": "989786567",
+          "email": "peraltaarrietjuan123@gmail.com",
+          "direccion": "AV. REPÚBLICA DE PANAMÁ NRO. 4050 URB. TAMBO (LOS NEGOCIOS 490)",
+          "ciudad": "SURQUILLO",
+          "estado": "LIMA",
+          "pais": "Perú",
+          "web": "",
+          "notas": "",
+          "estadoProveedor": "activo",
+          "createdAt": "2025-02-15T22:20:37.592Z",
+          "updatedAt": "2025-02-15T22:20:37.592Z"
+        },
+        "almacenes": [
+          {
+            "id": "68658f3b-a7e5-4fda-a41a-36fe72eecd2b",
+            "productoId": "cm7bcl6lh00052paaq8ijk9c7",
+            "almacenId": "72da5c72-b30a-48e6-8fa0-cc3474ba2e19",
+            "stock": 0,
+            "almacen": {
+              "id": "72da5c72-b30a-48e6-8fa0-cc3474ba2e19",
+              "nombre": "Alamcen San juan",
+              "codigo": "hfgh",
+              "direccion": "gffg",
+              "ciudad": "jauja",
+              "estadoRegion": "junin",
+              "codigoPostal": "124",
+              "pais": "Perú",
+              "responsable": "Juan caros",
+              "telefono": "900504813",
+              "email": "fgd",
+              "tipoAlmacen": "$.1",
+              "capacidadMaxima": 899,
+              "metodoValuacion": "$.1",
+              "sucursalId": "fd1fa973-a3aa-4fc1-aee7-2044d8c278c5",
+              "createdAt": "2025-02-18T21:28:55.198Z",
+              "updatedAt": "2025-02-18T21:28:55.198Z"
+            }
+          },
+          {
+            "id": "657c0a80-ada2-41a5-a208-014a4e4defcb",
+            "productoId": "cm7bcl6lh00052paaq8ijk9c7",
+            "almacenId": "842fb833-1df8-4606-9f7f-8b67b4df0871",
+            "stock": 0,
+            "almacen": {
+              "id": "842fb833-1df8-4606-9f7f-8b67b4df0871",
+              "nombre": "Almacen Tarma 2",
+              "codigo": "jhgj",
+              "direccion": "Centro poblado san juan de pachacayo",
+              "ciudad": "jauja",
+              "estadoRegion": "junin",
+              "codigoPostal": "124",
+              "pais": "Perú",
+              "responsable": "Diego sandro",
+              "telefono": "900504813",
+              "email": "",
+              "tipoAlmacen": "$.1",
+              "capacidadMaxima": 799,
+              "metodoValuacion": "$.0",
+              "sucursalId": "fd1fa973-a3aa-4fc1-aee7-2044d8c278c5",
+              "createdAt": "2025-02-18T20:54:58.001Z",
+              "updatedAt": "2025-02-18T20:54:58.001Z"
+            }
+          }
+        ],
+        "unidadesMedida": [
+          {
+            "id": "cm7bcl6lh00062paaoxss0wig",
+            "productoId": "cm7bcl6lh00052paaq8ijk9c7",
+            "unidadMedidaId": "cm76wwyzl00062pidokv8z720",
+            "stock": 0,
+            "precioCompra": 9,
+            "precioVenta": 10,
+            "factorConversion": 1,
+            "unidadMedida": {
+              "id": "cm76wwyzl00062pidokv8z720",
+              "codigo": "CT",
+              "descripcion": "CARTONES"
+            }
+          },
+          {
+            "id": "cm7bcl6lh00072paa58utddz7",
+            "productoId": "cm7bcl6lh00052paaq8ijk9c7",
+            "unidadMedidaId": "cm76wwyge00052pid9ufoxpz5",
+            "stock": 0,
+            "precioCompra": 0.25,
+            "precioVenta": 0.277777777777778,
+            "factorConversion": 36,
+            "unidadMedida": {
+              "id": "cm76wwyge00052pid9ufoxpz5",
+              "codigo": "BX",
+              "descripcion": "CAJAS"
+            }
+          }
+        ]
+      },
+      {
+        "id": "cm7c28lzi00052pgzc7aa4gxl",
+        "nombre": "Inka kola 34ml",
+        "imagen": "https://kverayzhgxugiklfqdmn.supabase.co/storage/v1/object/sign/productos/imagenes/d4e2977d-8936-4029-9d44-b890387028ec.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJwcm9kdWN0b3MvaW1hZ2VuZXMvZDRlMjk3N2QtODkzNi00MDI5LTlkNDQtYjg5MDM4NzAyOGVjLmpwZyIsImlhdCI6MTczOTk3ODQ0MSwiZXhwIjoyMDU1NTQ1ODAxfQ.PRshTP2ikgeBryjHD7YckKfZqt7dmOTu-wo0gfrkPoM",
+        "createdAt": "2025-02-19T15:20:41.413Z",
+        "updatedAt": "2025-02-19T15:20:41.413Z",
+        "categoriaId": "cm76veuw200002pga7bejaqug",
+        "fechaVencimiento": "2025-02-23T00:00:00.000Z",
+        "tieneIGV": false,
+        "codigoBarras": "fghf",
+        "proveedorId": null,
+        "lote": "fghfg",
+        "estado": "activo",
+        "descripcion": null,
+        "marca": "ghfgh",
+        "peso": null,
+        "dimensiones": null,
+        "impuestosAdicionales": 0,
+        "descuento": 0,
+        "fechaFabricacion": null,
+        "codigoInterno": "hfg",
+        "ubicacionAlmacen": null,
+        "costoAlmacenamiento": null,
+        "notas": null,
+        "categoria": {
+          "id": "cm76veuw200002pga7bejaqug",
+          "nombre": "GASEOSAS"
+        },
+        "proveedor": null,
+        "almacenes": [
+          {
+            "id": "31904043-d037-48c5-b195-a81159619453",
+            "productoId": "cm7c28lzi00052pgzc7aa4gxl",
+            "almacenId": "d15898e8-8753-4796-9898-3db197c79dd5",
+            "stock": 0,
+            "almacen": {
+              "id": "d15898e8-8753-4796-9898-3db197c79dd5",
+              "nombre": "Alamaen Tarma",
+              "codigo": "TRK9",
+              "direccion": "Centro poblado san juan de pachacayo",
+              "ciudad": "jauja",
+              "estadoRegion": "junin",
+              "codigoPostal": "124",
+              "pais": "Perú",
+              "responsable": "JUAN DIEGO",
+              "telefono": "900504813",
+              "email": "peraltaarrietajuan123@gmail.com",
+              "tipoAlmacen": "$.1",
+              "capacidadMaxima": 400,
+              "metodoValuacion": "$.0",
+              "sucursalId": "fd1fa973-a3aa-4fc1-aee7-2044d8c278c5",
+              "createdAt": "2025-02-15T19:06:55.243Z",
+              "updatedAt": "2025-02-15T19:06:55.243Z"
+            }
+          },
+          {
+            "id": "c19ac4f9-27d2-47e7-8aba-d80e0463717e",
+            "productoId": "cm7c28lzi00052pgzc7aa4gxl",
+            "almacenId": "842fb833-1df8-4606-9f7f-8b67b4df0871",
+            "stock": 0,
+            "almacen": {
+              "id": "842fb833-1df8-4606-9f7f-8b67b4df0871",
+              "nombre": "Almacen Tarma 2",
+              "codigo": "jhgj",
+              "direccion": "Centro poblado san juan de pachacayo",
+              "ciudad": "jauja",
+              "estadoRegion": "junin",
+              "codigoPostal": "124",
+              "pais": "Perú",
+              "responsable": "Diego sandro",
+              "telefono": "900504813",
+              "email": "",
+              "tipoAlmacen": "$.1",
+              "capacidadMaxima": 799,
+              "metodoValuacion": "$.0",
+              "sucursalId": "fd1fa973-a3aa-4fc1-aee7-2044d8c278c5",
+              "createdAt": "2025-02-18T20:54:58.001Z",
+              "updatedAt": "2025-02-18T20:54:58.001Z"
+            }
+          }
+        ],
+        "unidadesMedida": [
+          {
+            "id": "cm7c28lzi00062pgznnkcl3rw",
+            "productoId": "cm7c28lzi00052pgzc7aa4gxl",
+            "unidadMedidaId": "cm76wwxdw00032pidk2ez8oi9",
+            "stock": 0,
+            "precioCompra": 9,
+            "precioVenta": 10,
+            "factorConversion": 1,
+            "unidadMedida": {
+              "id": "cm76wwxdw00032pidk2ez8oi9",
+              "codigo": "BG",
+              "descripcion": "BOLSA"
+            }
+          },
+          {
+            "id": "cm7c28lzi00072pgzu23t5fi7",
+            "productoId": "cm7c28lzi00052pgzc7aa4gxl",
+            "unidadMedidaId": "cm76wwwuo00022pidq34i1px0",
+            "stock": 0,
+            "precioCompra": 1.125,
+            "precioVenta": 1.25,
+            "factorConversion": 8,
+            "unidadMedida": {
+              "id": "cm76wwwuo00022pidq34i1px0",
+              "codigo": "4A",
+              "descripcion": "BOBINAS"
+            }
+          }
+        ]
+      },
+      {
+        "id": "cm7c3dzio000l2pgznwnpcoi9",
+        "nombre": "inka chip 1 x 12 gm",
+        "imagen": "https://kverayzhgxugiklfqdmn.supabase.co/storage/v1/object/sign/productos/imagenes/de8bd00a-a37e-4441-a876-fe5a324f767d.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJwcm9kdWN0b3MvaW1hZ2VuZXMvZGU4YmQwMGEtYTM3ZS00NDQxLWE4NzYtZmU1YTMyNGY3NjdkLmpwZyIsImlhdCI6MTczOTk4MDM3MSwiZXhwIjoyMDU1NTQ3NzMxfQ.GBLzUIOwx0FUHkUumTzXpb4hg-QwLufe16oQefQt9jA",
+        "createdAt": "2025-02-19T15:52:51.848Z",
+        "updatedAt": "2025-02-19T15:52:51.848Z",
+        "categoriaId": "cm76veuw200002pga7bejaqug",
+        "fechaVencimiento": "2025-02-22T00:00:00.000Z",
+        "tieneIGV": false,
+        "codigoBarras": "fghfgh",
+        "proveedorId": null,
+        "lote": "fghfgh",
+        "estado": "activo",
+        "descripcion": null,
+        "marca": "thrth",
+        "peso": null,
+        "dimensiones": null,
+        "impuestosAdicionales": 0,
+        "descuento": 0,
+        "fechaFabricacion": null,
+        "codigoInterno": "fghgfh",
+        "ubicacionAlmacen": null,
+        "costoAlmacenamiento": null,
+        "notas": null,
+        "categoria": {
+          "id": "cm76veuw200002pga7bejaqug",
+          "nombre": "GASEOSAS"
+        },
+        "proveedor": null,
+        "almacenes": [
+          {
+            "id": "fdbc813e-2ec3-4d5b-a16d-863d3ba78719",
+            "productoId": "cm7c3dzio000l2pgznwnpcoi9",
+            "almacenId": "d15898e8-8753-4796-9898-3db197c79dd5",
+            "stock": 0,
+            "almacen": {
+              "id": "d15898e8-8753-4796-9898-3db197c79dd5",
+              "nombre": "Alamaen Tarma",
+              "codigo": "TRK9",
+              "direccion": "Centro poblado san juan de pachacayo",
+              "ciudad": "jauja",
+              "estadoRegion": "junin",
+              "codigoPostal": "124",
+              "pais": "Perú",
+              "responsable": "JUAN DIEGO",
+              "telefono": "900504813",
+              "email": "peraltaarrietajuan123@gmail.com",
+              "tipoAlmacen": "$.1",
+              "capacidadMaxima": 400,
+              "metodoValuacion": "$.0",
+              "sucursalId": "fd1fa973-a3aa-4fc1-aee7-2044d8c278c5",
+              "createdAt": "2025-02-15T19:06:55.243Z",
+              "updatedAt": "2025-02-15T19:06:55.243Z"
+            }
+          }
+        ],
+        "unidadesMedida": [
+          {
+            "id": "cm7c3dzio000m2pgzb4qyg0zz",
+            "productoId": "cm7c3dzio000l2pgznwnpcoi9",
+            "unidadMedidaId": "cm76wwyge00052pid9ufoxpz5",
+            "stock": 19,
+            "precioCompra": 9,
+            "precioVenta": 10,
+            "factorConversion": 1,
+            "unidadMedida": {
+              "id": "cm76wwyge00052pid9ufoxpz5",
+              "codigo": "BX",
+              "descripcion": "CAJAS"
+            }
+          }
+        ]
+      }
+    ],
+    "total": 3
+  }

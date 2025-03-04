@@ -1,0 +1,357 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  ADMIN
+  EMPLEADO
+  GERENTE
+  INVENTARISTA
+  VENDEDOR
+}
+
+model Usuario {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  nombre        String
+  rol           Rol
+  creado_en     DateTime @default(now())
+  preventas     Preventa[]
+  notificaciones Notificacion[]
+  usuarioSucursales UsuarioSucursal[]
+  usuarioAlmacenes  UsuarioAlmacen[]
+}
+
+model UsuarioSucursal {
+  id         String   @id @default(uuid())
+  usuarioId  String
+  sucursalId String
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  sucursal   Sucursal @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
+  @@unique([usuarioId, sucursalId])
+}
+
+model UsuarioAlmacen {
+  id         String   @id @default(uuid())
+  usuarioId  String
+  almacenId  String
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  almacen    Almacen  @relation(fields: [almacenId], references: [id], onDelete: Cascade)
+  @@unique([usuarioId, almacenId])
+}
+
+model Sucursal {
+  id                 String   @id @default(uuid())
+  nombre             String   @unique
+  direccion          String
+  ciudad             String
+  estado             String
+  codigoPostal       String
+  pais               String
+  telefono           String
+  email              String
+  empresaId          String
+  empresa            InfoEmpresa @relation(fields: [empresaId], references: [id])
+  almacenes          Almacen[]
+  gastos             Gasto[]
+  ingresos           Ingreso[]
+  preventas          Preventa[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  usuarioSucursales  UsuarioSucursal[]
+}
+
+model Almacen {
+  id                String @id @default(uuid())
+  nombre            String
+  codigo            String
+  direccion         String
+  ciudad            String
+  estadoRegion      String
+  codigoPostal      String
+  pais              String
+  responsable       String
+  telefono          String
+  email             String
+  tipoAlmacen       String
+  capacidadMaxima   Int
+  metodoValuacion   String
+  sucursalId        String
+  sucursal          Sucursal @relation(fields: [sucursalId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  preventas         Preventa[]
+  gastos            Gasto[]
+  ingresos          Ingreso[]
+  reporte           Reporte[]
+  usuarioAlmacenes  UsuarioAlmacen[]
+  productos         ProductoAlmacenUnidadMedida[] // Relación directa con precios y stock por unidad
+}
+
+model Producto {
+  id                  String    @id @default(cuid())
+  nombre              String
+  imagen              String    @default("")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  categoriaId         String
+  categoria           Categoria? @relation(fields: [categoriaId], references: [id])
+  fechaVencimiento    DateTime?
+  tieneIGV            Boolean   @default(false)
+  codigoBarras        String    @unique
+  proveedorId         String?
+  proveedor           Proveedor? @relation(fields: [proveedorId], references: [id])
+  lote                String?
+  estado              String    @default("activo")
+  descripcion         String?
+  marca               String?
+  peso                Float?
+  dimensiones         String?
+  impuestosAdicionales Float?   @default(0)
+  descuento           Float?    @default(0)
+  fechaFabricacion    DateTime?
+  codigoInterno       String    @unique
+  ubicacionAlmacen    String?
+  costoAlmacenamiento Float?
+  notas               String?
+  detallePreventas    DetallePreventa[]
+  productoConBonificacion Boolean @default(false)
+  unidadesMedida      ProductoUnidadMedida[]        // Define las unidades posibles y factores de conversión
+  almacenes           ProductoAlmacenUnidadMedida[] 
+  bonificaciones      Bonificacion[]
+}
+
+model UnidadMedida {
+  id          String  @id @default(cuid())
+  codigo      String  @unique
+  descripcion String
+  productos   ProductoUnidadMedida[]          // Relación con productos
+  preciosPorAlmacen ProductoAlmacenUnidadMedida[] // Relación con precios y stock por almacén
+}
+
+model ProductoUnidadMedida {
+  id               String   @id @default(cuid())
+  productoId       String
+  unidadMedidaId   String
+  factorConversion Float    // Factor de conversión respecto a la unidad principal
+  esUnidadPrincipal Boolean  @default(false) // Indica si es la unidad base
+  precioCompraBase Float    @default(0)     // Precio base de referencia (opcional)
+  precioVentaBase  Float    @default(0)     // Precio base de referencia (opcional)
+
+  // Relaciones
+  producto         Producto     @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  unidadMedida     UnidadMedida @relation(fields: [unidadMedidaId], references: [id])
+
+  @@unique([productoId, unidadMedidaId])
+}
+
+model ProductoAlmacenUnidadMedida {
+  id              String   @id @default(cuid())
+  productoId      String
+  almacenId       String
+  unidadMedidaId  String
+  stock           Int      @default(0)    // Stock específico por almacén y unidad
+  precioCompra    Float    @default(0)    // Precio de compra específico por almacén y unidad
+  precioVenta     Float    @default(0)    // Precio de venta específico por almacén y unidad
+
+  // Relaciones
+  producto        Producto     @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  almacen         Almacen      @relation(fields: [almacenId], references: [id], onDelete: Cascade)
+  unidadMedida    UnidadMedida @relation(fields: [unidadMedidaId], references: [id])
+
+  @@unique([productoId, almacenId, unidadMedidaId])
+}
+
+// Resto de modelos sin cambios relevantes para este caso
+model Categoria {
+  id        String    @id @default(cuid())
+  nombre    String    @unique
+  productos Producto[]
+}
+
+model Proveedor {
+  id              String    @id @default(uuid())
+  nombre          String
+  ruc             String?   @unique
+  contacto        String?
+  telefono        String?
+  email           String?
+  direccion       String?
+  ciudad          String?
+  estado          String?
+  pais            String?   @default("Perú")
+  web             String?
+  notas           String?
+  estadoProveedor String    @default("activo")
+  productos       Producto[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Cliente {
+  id                String     @id @default(uuid())
+  nombre            String
+  razonSocial       String?
+  tipoCliente       String
+  tipoDocumento     String
+  numeroDocumento   String     @unique
+  digitoVerificador String?
+  email             String?    @db.VarChar(255)
+  telefono          String?
+  direccion         String?
+  direccionFiscal   String?
+  estado            Boolean    @default(true)
+  preventas         Preventa[]
+}
+
+model DetallePreventa {
+  id              String   @id @default(uuid())
+  preventaId      String
+  preventa        Preventa @relation(fields: [preventaId], references: [id])
+  productoId      String
+  producto        Producto @relation(fields: [productoId], references: [id])
+  unidadMedida    String
+  cantidad        Int
+  precioUnitario  Float
+  descuento       Float    @default(0)
+  total           Float
+  tipoAfectacionIGV String   @default("10")
+}
+
+model Preventa {
+  id               String   @id @default(uuid())
+  serieDocumentoId String
+  serieDocumento   SerieDocumento @relation(fields: [serieDocumentoId], references: [id])
+  clienteId        String
+  cliente          Cliente  @relation(fields: [clienteId], references: [id])
+  usuarioId        String
+  usuario          Usuario  @relation(fields: [usuarioId], references: [id])
+  sucursalId       String
+  sucursal         Sucursal @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
+  almacenId        String
+  almacen          Almacen? @relation(fields: [almacenId], references: [id])
+  fecha            DateTime @default(now())
+  metodoPago       String   @default("efectivo")
+  estado           String   @default("pendiente")
+  tipoComprobante  String   @default("01")
+  subtotal         Float
+  impuesto         Float
+  descuento        Float    @default(0)
+  total            Float
+  notas            String?
+  xml              String?
+  moneda           String   @default("PEN")
+  baseImponible    Float
+  valorVenta       Float
+  igv              Float
+  tipoOperacion    String   @default("0101")
+  firmaDigital     String?
+  estadoSunat      String   @default("PENDIENTE")
+  detallePreventas DetallePreventa[]
+  bonificaciones   Bonificacion[]
+  latitud          Float? 
+  longitud         Float?  
+}
+
+model Bonificacion {
+  id            String    @id @default(uuid())
+  preventaId    String
+  preventa      Preventa  @relation(fields: [preventaId], references: [id], onDelete: Cascade)
+  productoId    String
+  producto      Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  cantidad      Int       // Cantidad de unidades bonificadas
+  fecha         DateTime  @default(now()) // Fecha de la bonificación para análisis temporal
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model SerieDocumento {
+  id         String @id @default(uuid())
+  tipoVenta  String
+  serie      String
+  ultimoCorrelativo Int
+  preventas  Preventa[]
+}
+
+model InfoEmpresa {
+  id                String   @id @default(uuid())
+  ruc               String   @unique
+  razonSocial       String
+  nombreComercial   String?
+  direccionFiscal   String
+  distrito          String
+  provincia         String
+  departamento      String
+  ubigeo            String
+  telefono          String?
+  email             String?
+  paginaWeb         String?
+  representanteLegal String?
+  tipoContribuyente String
+  dniRepresentante  String?
+  estado            String   @default("ACTIVO")
+  condicion         String   @default("HABIDO")
+  logoUrl           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  sucursales        Sucursal[]
+}
+
+model Gasto {
+  id            String   @id @default(uuid())
+  sucursalId    String
+  sucursal      Sucursal @relation(fields: [sucursalId], references: [id])
+  almacenId     String
+  almacen       Almacen  @relation(fields: [almacenId], references: [id])
+  descripcion   String
+  monto         Float
+  fecha         DateTime @default(now())
+  categoria     String
+  tipo          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Ingreso {
+  id            String   @id @default(uuid())
+  sucursalId    String
+  sucursal      Sucursal @relation(fields: [sucursalId], references: [id])
+  almacenId     String
+  almacen       Almacen  @relation(fields: [almacenId], references: [id])
+  descripcion   String
+  monto         Float
+  fecha         DateTime @default(now())
+  categoria     String
+  tipo          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Reporte {
+  id            String   @id @default(uuid())
+  almacenId     String
+  almacen       Almacen  @relation(fields: [almacenId], references: [id])
+  tipoReporte   String
+  fechaInicio   DateTime
+  fechaFin      DateTime
+  contenido     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Notificacion {
+  id            String   @id @default(uuid())
+  usuarioId     String
+  usuario       Usuario  @relation(fields: [usuarioId], references: [id])
+  mensaje       String
+  leida         Boolean  @default(false)
+  fecha         DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+

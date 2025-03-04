@@ -1,0 +1,176 @@
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            <div className="ruc flex flex-col">
+              <Input
+                label="Email"
+                name="email"
+                placeholder="Nombre Comercial"
+                type="text"
+                variant="underlined"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
+            {/* Skeleton 2 */}
+            <div className="ruc flex flex-col">
+              <Input
+                label="Nombre comercial"
+                placeholder="Ingrese nombre comercial"
+                type="text"
+                name="nombreComercial"
+                variant="underlined"
+                value={formData.nombreComercial}
+                onChange={handleChange}
+              />
+            </div>
+            {/* Skeleton 3 */}
+            <div className="ruc flex flex-col">
+              <Input
+                name="direccionFiscal"
+                label="Direccion Fiscal"
+                placeholder="Ingrese direccion fiscal"
+                type="text"
+                variant="underlined"
+                value={formData.direccionFiscal}
+                onChange={handleChange}
+              />
+            </div>
+            {/* Skeleton 4 */}
+            <div className="ruc flex flex-col">
+              <Input
+                name="ruc"
+                label="RUC"
+                placeholder="Ingrese RUC"
+                type="text"
+                variant="underlined"
+                value={formData.ruc}
+                onChange={handleChange}
+              />
+            </div>
+            {/* Skeleton 5 */}
+            <div className="ruc flex flex-col">
+              <Input
+                name="distrito"
+                label="Distrito"
+                placeholder="Ingrese distrito"
+                type="text"
+                variant="underlined"
+                value={formData.distrito}
+                onChange={handleChange}
+              />
+            </div>
+            {/* Skeleton 6 */}
+            <div className="ruc flex flex-col">
+              <Input
+                name="provincia"
+                label="Provincia"
+                placeholder="Ingrese provincia"
+                type="text"
+                variant="underlined"
+                value={formData.provincia}
+                onChange={handleChange}
+              />
+            </div>
+            {/* Skeleton 7 */}
+            <div className="ruc flex flex-col">
+              <Input
+                name="departamento"
+                label="Departamento"
+                placeholder="Ingresel deptartamento"
+                type="text"
+                variant="underlined"
+                value={formData.departamento}
+                onChange={handleChange}
+              />
+            </div>
+            {/* Skeleton 8 */}
+            <div className="ruc flex flex-col">
+              <Input
+                name="ubigeo"
+                label="Ubigeo"
+                placeholder="Ingrese ubigeo"
+                type="text"
+                variant="underlined"
+                value={formData.ubigeo}
+                onChange={handleChange}
+              />
+            </div>
+            {/* Skeleton 9 */}
+            <div className="ruc flex flex-col">
+              <Input
+                name="representanteLegal"
+                label="Representante legal"
+                placeholder="Ingrese nombre representante"
+                type="text"
+                variant="underlined"
+                value={formData.representanteLegal}
+                onChange={handleChange}
+              />
+            </div>
+            {/* Skeleton 10 */}
+            <div className="ruc flex flex-col">
+              <Input
+                name="dniRepresentante"
+                label="Dni representante"
+                placeholder="Ingrese dnni representante"
+                type="text"
+                variant="underlined"
+                value={formData.dniRepresentante}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="ruc flex flex-col">
+              <Input
+                name="estado"
+                label="Estado"
+                placeholder="Ingrese estado"
+                type="text"
+                variant="underlined"
+                value={formData.estado}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="ruc flex flex-col">
+              <Input
+                name="condicion"
+                label="Condicion"
+                placeholder="Condicion"
+                type="text"
+                variant="underlined"
+                value={formData.condicion}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="ruc flex flex-col">
+              <Input
+                name="paginaWeb"
+                label="Direccion pagina web"
+                placeholder="Ingrese url"
+                type="text"
+                variant="underlined"
+                value={formData.paginaWeb}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="ruc flex flex-col">
+              <Input
+                name="tipoContribuyente"
+                label="Tipo Contribuyente"
+                placeholder="Ingrese url"
+                type="text"
+                variant="underlined"
+                value={formData.tipoContribuyente}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="ruc flex flex-col">
+              <Input
+                name="razonSocial"
+                label="Razon Social"
+                placeholder="Ingrese razon "
+                type="text"
+                variant="underlined"
+                value={formData.razonSocial}
+                onChange={handleChange}
+              />
+            </div>
+          </div>

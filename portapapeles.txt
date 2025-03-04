@@ -1,0 +1,270 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import {
+  ScrollShadow,
+  Image,
+  Button,
+  Input,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/react";
+import { useState } from "react";
+import { ArrowRight, ArrowLeft, Search } from "lucide-react";
+import { AddNoteIcon, CopyDocumentIcon } from "@/components/iconos/icons"; // Ajusta según tus íconos
+import RegistrarClienteForm from "./components/agregar-clientes";
+import ProductosSeleccionados from "./components/productos-seleccionados";
+import BuscadorClientes from "./components/buscador-clientes";
+import ResumenVenta from "./components/resumen-venta";
+import { toast } from "sonner";
+import { usarProductos } from "@/app/hooks/usar-producto";
+
+const CategoriaSlider = dynamic(
+  () => import("../components/slider/categoria-slider"),
+  {
+    loading: () => <p>Cargando categorías...</p>,
+    ssr: false,
+  }
+);
+
+const ProductoLista = dynamic(() => import("../components/producto-lista"), {
+  loading: () => <p>Cargando productos...</p>,
+  ssr: false,
+});
+
+interface Cliente {
+  id: string;
+  nombre: string;
+  numeroDocumento: string;
+}
+
+export default function NuevaVenta() {
+  const {
+    productos,
+    categoriasCompletas: categorias, // Renombramos para mantener consistencia
+    isLoading, // Cambiamos loading por isLoading
+    handleSearchChange, // Reemplaza setBusqueda
+  } = usarProductos({}); // Puedes pasar categoriaId si quieres filtrar
+
+  const [productosSeleccionados, setProductosSeleccionados] = useState<any[]>(
+    []
+  );
+  const [busquedaCliente, setBusquedaCliente] = useState<string>("");
+  const [clientesFiltrados, setClientesFiltrados] = useState<any[]>([]);
+  const [clienteSeleccionado, setClienteSeleccionado] =
+    useState<Cliente | null>(null);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<
+    string | null
+  >(null); // Manejamos localmente
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [registroLoading, setRegistroLoading] = useState(false);
+
+  // Loader GIF cuando isLoading sea true
+  if (isLoading) {
+    return (
+      <div className="bg-opacity-20 flex justify-center items-center h-screen w-screen">
+        <img src="/assets/loader.gif" alt="Cargando..." className="w-16 h-16" />
+      </div>
+    );
+  }
+
+  const agregarProducto = (producto: any) => {
+    const existe = productosSeleccionados.find((p) => p.id === producto.id);
+
+    if (existe) {
+      setProductosSeleccionados((prev) =>
+        prev.map((p) =>
+          p.id === producto.id
+            ? {
+                ...p,
+                precioVenta: producto.precioVenta,
+                unidadSeleccionada: producto.unidadSeleccionada || {
+                  unidadMedida: "unidad",
+                  factorConversion: 1,
+                  precioVenta: producto.precioVenta,
+                },
+              }
+            : p
+        )
+      );
+    } else {
+      setProductosSeleccionados((prev) => [
+        ...prev,
+        {
+          ...producto,
+          cantidad: 1,
+          unidadSeleccionada: producto.unidadSeleccionada || {
+            unidadMedida: "unidad",
+            factorConversion: 1,
+            precioVenta: producto.precioVenta,
+          },
+        },
+      ]);
+    }
+  };
+
+  const eliminarProducto = (id: string) => {
+    setProductosSeleccionados((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const iconClasses =
+    "text-xl text-default-500 pointer-events-none flex-shrink-0";
+
+  const registrarVenta = async () => {
+    if (productosSeleccionados.length === 0) {
+      toast.error("Debe seleccionar al menos un producto");
+      return;
+    }
+    // Lógica de registrarVenta sigue igual...
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Lista de Productos */}
+      <div
+        className={`transition-all duration-500 ease-in-out top-0 left-0 w-full bg-white dark:bg-black dark:text-white z-50 ${
+          productosSeleccionados.length > 0 && !isMobile()
+            ? "w-[calc(100%-24rem)]"
+            : "w-screen"
+        }`}
+      >
+        {/* Buscador */}
+        <div className="mb-4">
+          <Input
+            placeholder="Buscar productos..."
+            value={busquedaCliente} // Podemos usar esta variable temporalmente
+            onValueChange={(value) => {
+              setBusquedaCliente(value); // Para mantener compatibilidad
+              handleSearchChange(value); // Usamos la función del hook
+            }}
+            startContent={<Search />}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 dark:focus:border-white dark:bg-gray-600"
+          />
+        </div>
+
+        {/* Slider de Categorías */}
+        <div className="mb-6">
+          <CategoriaSlider
+            categorias={categorias}
+            categoriaSeleccionada={categoriaSeleccionada}
+            setCategoriaSeleccionada={setCategoriaSeleccionada}
+          />
+        </div>
+
+        {/* Lista de Productos con Scroll */}
+        <ScrollShadow className="h-[calc(100vh-200px)]" hideScrollBar size={20}>
+          <ProductoLista
+            productos={productos}
+            onProductoSeleccionado={agregarProducto}
+            isMobile={isMobile()}
+          />
+        </ScrollShadow>
+      </div>
+
+      {/* Contenedor de Productos Seleccionados */}
+      {productosSeleccionados.length > 0 && (
+        <div
+          className={`w-96 dark:bg-gray-900 shadow-lg bg-white ${
+            productosSeleccionados.length > 0
+              ? "translate-y-0 opacity-100"
+              : "translate-x-full opacity-0"
+          } transition-all duration-500 ease-in-out`}
+        >
+          <div className="w-full h-[9vh] flex items-center justify-between p-3">
+            <div className="w-3/5">
+              <BuscadorClientes
+                busquedaCliente={busquedaCliente}
+                setBusquedaCliente={setBusquedaCliente}
+                clientesFiltrados={clientesFiltrados}
+                setClientesFiltrados={setClientesFiltrados}
+                onClienteSeleccionado={(cliente) =>
+                  setClienteSeleccionado(cliente)
+                }
+              />
+            </div>
+            <div className="w-1/3">
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button variant="bordered">Open Menu</Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Dropdown menu with icons"
+                  variant="faded"
+                >
+                  <DropdownItem
+                    key="new"
+                    startContent={<AddNoteIcon className={iconClasses} />}
+                    onPress={() => setIsModalOpen(true)}
+                  >
+                    Registrar Cliente
+                  </DropdownItem>
+                  <DropdownItem
+                    key="copy"
+                    startContent={<CopyDocumentIcon className={iconClasses} />}
+                  >
+                    Consulta Reniec Cli
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+
+              <RegistrarClienteForm
+                isOpen={isModalOpen}
+                onOpenChange={setIsModalOpen} // Controla apertura/cierre del modal
+                onRegistroLoadingChange={setRegistroLoading} // Opcional: maneja el estado de carga
+              />
+
+              {registroLoading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                  <p className="text-white">Registrando cliente...</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <ScrollShadow
+            className="flex-1 z-50 h-[60vh] overflow-y-auto"
+            orientation="horizontal"
+            size={20}
+          >
+            <ProductosSeleccionados
+              productos={productosSeleccionados}
+              eliminarProducto={eliminarProducto}
+              actualizarCantidad={(id, nuevaCantidad) =>
+                setProductosSeleccionados((prev) =>
+                  prev.map((p) =>
+                    p.id === id ? { ...p, cantidad: nuevaCantidad } : p
+                  )
+                )
+              }
+              igvPorcentaje={18}
+            />
+          </ScrollShadow>
+
+          <div className="h-[10vh]">
+            <ResumenVenta
+              productosSeleccionados={productosSeleccionados}
+              igvPorcentaje={18}
+              tipoVentaSeleccionada="factura"
+              onTipoVentaChange={() => {}}
+              metodoPagoSeleccionado="efectivo"
+              onMetodoPagoChange={() => {}}
+              notas=""
+              onNotasChange={() => {}}
+              onCalcularResumenChange={() => {}}
+            />
+          </div>
+
+          <Button onClick={registrarVenta} color="primary">
+            Registrar Venta
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function isMobile(): boolean {
+  return typeof window !== "undefined" && window.innerWidth < 768;
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+  <cbc:ID xmlns="">5634cf58-64bb-4f21-932e-4eb27292c369</cbc:ID>
+  <cbc:IssueDate xmlns="">2025-02-10</cbc:IssueDate>
+  <cbc:InvoiceTypeCode xmlns="">01</cbc:InvoiceTypeCode>
+  <cac:AccountingSupplierParty xmlns="">
+    <cbc:CustomerAssignedAccountID>12345678901</cbc:CustomerAssignedAccountID>
+    <cbc:AdditionalAccountID>6</cbc:AdditionalAccountID>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty xmlns="">
+    <cbc:CustomerAssignedAccountID>a355ccf2-e4af-4422-8de4-13af74e3334e</cbc:CustomerAssignedAccountID>
+    <cbc:AdditionalAccountID>1</cbc:AdditionalAccountID>
+  </cac:AccountingCustomerParty>
+  <cac:LegalMonetaryTotal xmlns="">
+    <cbc:PayableAmount currencyID="PEN">25.89</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine xmlns="">
+    <cbc:ID>9b7333c7-e4e9-4d27-a8f1-1e0cb6c9e382</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="Paquete">2</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="PEN">24.00</cbc:LineExtensionAmount>
+    <cac:PricingReference>
+      <cac:AlternativeConditionPrice>
+        <cbc:PriceAmount currencyID="PEN">12.00</cbc:PriceAmount>
+      </cac:AlternativeConditionPrice>
+    </cac:PricingReference>
+    <cbc:ID>b7d9a4e8-e4dc-473e-ae5f-976564947edd</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="Unidad">2</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="PEN">1.89</cbc:LineExtensionAmount>
+    <cac:PricingReference>
+      <cac:AlternativeConditionPrice>
+        <cbc:PriceAmount currencyID="PEN">0.80</cbc:PriceAmount>
+      </cac:AlternativeConditionPrice>
+    </cac:PricingReference>
+  </cac:InvoiceLine>
+</Invoice>
