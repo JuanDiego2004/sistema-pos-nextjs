@@ -1,55 +1,51 @@
 import prisma from "@/lib/prisma";
 import axios from "axios";
+
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const ruc = url.searchParams.get("ruc");
+export async function GET(req: Request) {
+  // Extraer el parámetro 'ruc' de la query string
+  const { searchParams } = new URL(req.url);
+  const ruc = searchParams.get("ruc");
 
+  // Validar que el parámetro 'ruc' esté presente
   if (!ruc) {
-    return NextResponse.json({ error: "El RUC es requerido" }, { status: 400 });
+    return NextResponse.json({ error: "RUC es requerido" }, { status: 400 });
   }
 
   try {
-    const response = await axios.get(`https://api.factiliza.com/v1/ruc/info/${ruc}`, {
-      headers: {
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzODE2MCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnN1bHRvciJ9.3kxCrMZtiUOkSI6AjlqubZxSbwPibZwXoZIZZWJm3hY",
-      },
-    });
-
-    if (response.status !== 200 || !response.data.success) {
-      return NextResponse.json({ error: "Error al consultar el RUC" }, { status: response.status });
+    // Obtener el token de autorización desde una variable de entorno
+    const token = process.env.FACTILIZA_API_TOKEN;
+    if (!token) {
+      throw new Error("Token de autorización no configurado");
     }
 
-    const data = response.data.data; // ✅ Aquí extraemos los datos reales dentro de "data"
-
-    // Verificamos si data existe antes de mapearlo
-    if (!data) {
-      return NextResponse.json({ error: "No se encontraron datos para el RUC proporcionado" }, { status: 404 });
-    }
-
-    // Mapear los datos correctamente
-    const resultado = {
-      ruc: data.numero,
-      razonSocial: data.nombre_o_razon_social,
-      tipoContribuyente: data.tipo_contribuyente,
-      estado: data.estado === "SUSPENSION TEMPORAL" ? "INACTIVO" : "ACTIVO",
-      condicion: data.condicion,
-      departamento: data.departamento,
-      provincia: data.provincia,
-      distrito: data.distrito,
-      direccionFiscal: data.direccion,
-      ubigeo: data.ubigeo_sunat,
+    // Configurar las opciones de la solicitud a una API externa
+    const options: RequestInit = {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
     };
 
-    return NextResponse.json(resultado, { status: 200 });
+    // Hacer la solicitud a la API externa
+    const response = await fetch(
+      `https://api.factiliza.com/v1/ruc/info/${ruc}`,
+      options
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Error al consultar la API");
+    }
+
+    // Devolver la respuesta exitosa
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("Error al consultar RUC:", error);
-    return NextResponse.json({ error: "Ocurrió un error al consultar el RUC" }, { status: 500 });
+    return NextResponse.json(
+      { error: (error as Error).message },
+      { status: 500 }
+    );
   }
 }
-
-
 
 // Manejar solicitudes POST para registrar un proveedor
 export async function POST(request: NextRequest) {

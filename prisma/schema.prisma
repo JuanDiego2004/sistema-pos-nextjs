@@ -300,6 +300,9 @@ model InfoEmpresa {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   sucursales        Sucursal[]
+  certificadoDigital Bytes?   // Almacena el archivo .pfx o .cer como binario
+  clavePrivada      Bytes?   // Almacena la clave privada (.key) si está separada
+  certificadoPassword String? // Contraseña del certificado (si aplica)
 }
 
 model Gasto {

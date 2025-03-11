@@ -53,6 +53,35 @@ export default function Sidebar({ role }: SidebarProps) {
             link: "/protected//inventarista" 
           },
         ],
+        
+      },
+      {
+        title: "POS",
+        icon: <User size={22} />,
+        submenu: [
+          {
+            title: "Preventa",
+            link: "/protected/paginas-generales/ventas/preventa",
+          },
+          { title: "Lista Ventas", 
+            link: "/protected/paginas-generales/ventas/lista-ventas"  
+          },
+          { title: "empresa", 
+            link: "/protected/admin/registro-empresa"  
+          },
+        ],
+        
+      },
+      {
+        title: "RUTAS",
+        icon: <User size={22} />,
+        submenu: [
+          {
+            title: "Mapa GPS",
+            link: "/protected/repartidor",
+          },
+        ],
+        
       },
       // ... resto de menús
     ],
@@ -87,12 +116,7 @@ export default function Sidebar({ role }: SidebarProps) {
             title: "Venta Rapida",
             link: "/protected/paginas-generales/ventas/preventa",
           },
-          { title: "Preventa", 
-            link: "/protected/paginas-generales/ventas/nueva-venta"  
-          },
-          { title: "Lista Ventas", 
-            link: "/protected/paginas-generales/ventas/lista-ventas"  
-          },
+
         ],
       },
       { title: "Almacen", 

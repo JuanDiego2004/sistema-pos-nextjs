@@ -66,6 +66,7 @@ export default function NuevaVenta() {
     categorias,
     productos,
     categoriaSeleccionada,
+    productosConBonificacion,
     setCategoriaSeleccionada,
     loading,
     error,
@@ -81,7 +82,6 @@ export default function NuevaVenta() {
   const [clientesFiltrados, setClientesFiltrados] = useState<any[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
 
-  const supabase = createClient();
 
   const agregarProducto = (producto: any) => {
     const existe = productosSeleccionados.find((p) => p.id === producto.id);
@@ -233,25 +233,24 @@ export default function NuevaVenta() {
         console.warn(geoError instanceof Error ? geoError.message : "Error desconocido");
       }
   
-      // Generar las bonificaciones asegurándonos de que se incluyan correctamente
-    const bonificaciones = productosSeleccionados
-    .filter((producto) => (cantidadesBonificadas[producto.id] || 0) > 0) // Solo productos con bonificaciones
-    .map((producto) => {
-      const cantidadBonificada = cantidadesBonificadas[producto.id] || 0;
-      console.log(`Producto ${producto.id} tiene ${cantidadBonificada} bonificaciones`); // Depuración
-      return {
-        productoId: producto.id,
-        cantidad: cantidadBonificada,
-      };
-    });
-
-  console.log("Bonificaciones a enviar:", bonificaciones); // Depuración para verificar
+      // Generar las bonificaciones a partir de todas las cantidades bonificadas especificadas
+      const bonificaciones = Object.entries(cantidadesBonificadas)
+        .filter(([, cantidad]) => cantidad > 0) // Solo incluir productos con cantidad bonificada mayor a 0
+        .map(([productoId, cantidad]) => {
+          console.log(`Producto ${productoId} tiene ${cantidad} bonificaciones`); // Depuración
+          return {
+            productoId,
+            cantidad,
+          };
+        });
+  
+      console.log("Bonificaciones a enviar:", bonificaciones); // Depuración para verificar
   
       const requestBody = {
         productos: productosSeleccionados.map((producto) => ({
           id: producto.id,
           cantidad: producto.cantidad,
-          cantidadBonificada: cantidadesBonificadas[producto.id] || 0,
+          cantidadBonificada: cantidadesBonificadas[producto.id] || 0, // Cantidad bonificada para productos seleccionados
           unidadSeleccionada: producto.unidadSeleccionada
             ? {
                 precioVenta: producto.unidadSeleccionada.precioVenta,
@@ -272,7 +271,7 @@ export default function NuevaVenta() {
         subtotal: resumenCalculado.subtotal,
         impuesto: resumenCalculado.igvTotal,
         total: resumenCalculado.total,
-        bonificaciones,
+        bonificaciones, // Enviar todas las bonificaciones
         descuento: 0,
         baseImponible: resumenCalculado.subtotal,
         valorVenta: resumenCalculado.subtotal,
@@ -297,7 +296,6 @@ export default function NuevaVenta() {
         setClienteSeleccionado(null);
         setCantidadesBonificadas({});
         setBusquedaCliente("");
-        // No se descarga el XML, solo se guarda en la base de datos por la API
       } else {
         toast.error(data.error || "Error al registrar la venta");
         audioError();
@@ -522,6 +520,7 @@ export default function NuevaVenta() {
 
           <DetallesVentaModalMobile
             isOpen={isModalDetalles}
+            productosConBonificacion={productosConBonificacion}
             onOpenChange={setIsModalDetalles}
             productosSeleccionados={productosSeleccionados}
             igvPorcentaje={igvPorcentaje}
@@ -597,6 +596,7 @@ export default function NuevaVenta() {
             <ResumenVenta
               productosSeleccionados={productosSeleccionados}
               igvPorcentaje={igvPorcentaje}
+              productosConBonificacion={productosConBonificacion}
               tipoVentaSeleccionada={tipoVenta}
               onTipoVentaChange={setTipoVenta}
               metodoPagoSeleccionado={metodoPago}

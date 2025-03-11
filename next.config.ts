@@ -17,6 +17,19 @@ const nextConfig: NextConfig = {
     domains: ['acxbeymnpkkexnplcwjf.supabase.co', "www.pngwing.com", "images.unsplash.com"]
   },
   
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Permissions-Policy',
+            value: 'geolocation=(self)',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

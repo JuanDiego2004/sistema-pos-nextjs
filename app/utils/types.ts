@@ -31,6 +31,7 @@ export interface ProductoAlmacenUnidadMedida {
 }
 
 export interface Producto {
+  productoConBonificacion: boolean;
   cantidad: any;
   unidadSeleccionada: any;
   id: string;
@@ -171,27 +172,30 @@ export interface Almacen {
 
 export interface InfoEmpresa {
   id: string;
-  email: string;
-  nombreComercial: string;
+  email: string | null; // Cambiado a nullable para coincidir con el modelo
+  nombreComercial: string | null;
   direccionFiscal: string;
   ruc: string;
   distrito: string;
   provincia: string;
   departamento: string;
   ubigeo: string;
-  representanteLegal: string;
-  dniRepresentante: string;
+  representanteLegal: string | null;
+  dniRepresentante: string | null;
   estado: string;
   condicion: string;
-  paginaWeb: string;
+  paginaWeb: string | null;
   tipoContribuyente: string;
   razonSocial: string;
-  telefono: string;
-  logoUrl: string;
-  createdAt: string;
-  updatedAt: string;
+  telefono: string | null;
+  logoUrl: string | null;
+  createdAt: string; // Podría ser Date si lo conviertes en el cliente
+  updatedAt: string; // Podría ser Date si lo conviertes en el cliente
+  // Nuevos campos para el certificado digital
+  certificadoDigital: Buffer | null; // Buffer para Bytes en Prisma
+  clavePrivada: Buffer | null;      // Buffer para Bytes en Prisma, opcional
+  certificadoPassword: string | null; // Contraseña del certificado
 }
-
 export interface UnidadMedida {
   id: string; // Incluimos id como en ProductoCard
   unidadMedidaId?: string;

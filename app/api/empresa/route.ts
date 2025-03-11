@@ -93,23 +93,3 @@ export async function POST(request: Request) {
 }
 
 
-
-export async function PUT(req: NextRequest) {
-  try {
-    const { id, ...data } = await req.json(); // Extraer el ID y los datos a actualizar
-
-    if (!id) {
-      return NextResponse.json({ error: "El ID es requerido" }, { status: 400 });
-    }
-
-    const empresaActualizada = await prisma.infoEmpresa.update({
-      where: { id },
-      data,
-    });
-
-    return NextResponse.json(empresaActualizada, { status: 200 });
-  } catch (error) {
-    console.error("Error al actualizar empresa:", error);
-    return NextResponse.json({ error: "No se pudo actualizar la empresa" }, { status: 500 });
-  }
-}

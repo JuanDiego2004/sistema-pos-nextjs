@@ -10,10 +10,11 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/modal";
-import { usarEmpresaInfo } from "@/app/hooks/usarEmpresa";
+
 import { InfoEmpresa } from "@/app/utils/types";
 import { toast } from "sonner";
 import usarConsultaRuc from "@/app/hooks/usarConsultaRuc";
+import { usarEmpresaData } from "../hook/usarEmpresa";
 
 interface ModalEmpresaInfoProps {
   isOpen: boolean;
@@ -24,8 +25,10 @@ const ModalEmpresaInfo: React.FC<ModalEmpresaInfoProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { empresaInfo, actualizarEmpresa } = usarEmpresaInfo();
+  const { empresaInfo, actualizarEmpresa } = usarEmpresaData();
   const [formData, setFormData] = useState<Partial<InfoEmpresa>>({});
+  const [certFile, setCertFile] = useState<File | null>(null); // Para el certificado
+  const [keyFile, setKeyFile] = useState<File | null>(null);   // Para la clave privada
   const [loading, setLoading] = useState(false);
   const [isConsultaOpenRuc, setIsConsultaRucOpen] = useState(false);
 
@@ -49,10 +52,7 @@ const ModalEmpresaInfo: React.FC<ModalEmpresaInfoProps> = ({
         provincia: empresaInfo.provincia ?? "",
         departamento: empresaInfo.departamento ?? "",
         ubigeo: empresaInfo.ubigeo ?? "",
-        telefono:
-          empresaInfo.telefono !== undefined
-            ? String(empresaInfo.telefono)
-            : "",
+        telefono: empresaInfo.telefono ?? "",
         email: empresaInfo.email ?? "",
         paginaWeb: empresaInfo.paginaWeb ?? "",
         representanteLegal: empresaInfo.representanteLegal ?? "",
@@ -61,6 +61,7 @@ const ModalEmpresaInfo: React.FC<ModalEmpresaInfoProps> = ({
         estado: empresaInfo.estado ?? "",
         condicion: empresaInfo.condicion ?? "",
         logoUrl: empresaInfo.logoUrl ?? "",
+        certificadoPassword: empresaInfo.certificadoPassword ?? "",
       });
     }
   }, [empresaInfo, isOpen]);
@@ -88,9 +89,9 @@ const ModalEmpresaInfo: React.FC<ModalEmpresaInfoProps> = ({
         logoUrl: rucData.logoUrl || "",
       }));
     }
-  }, [rucData]); // Se ejecuta cada vez que rucData cambia
+  }, [rucData]);
 
-  // Manejar cambios en los inputs
+  // Manejar cambios en los inputs de texto
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prev) => ({
@@ -99,11 +100,36 @@ const ModalEmpresaInfo: React.FC<ModalEmpresaInfoProps> = ({
     }));
   };
 
+  // Manejar la subida del certificado
+  const handleCertFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) setCertFile(file);
+  };
+
+  // Manejar la subida de la clave privada
+  const handleKeyFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) setKeyFile(file);
+  };
+
   // Guardar cambios
   const handleSave = async () => {
     setLoading(true);
     try {
-      await actualizarEmpresa(formData);
+      const updatedData = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          updatedData.append(key, value.toString());
+        }
+      });
+  
+      if (certFile) updatedData.append("certificadoDigital", certFile);
+      if (keyFile) updatedData.append("clavePrivada", keyFile);
+  
+      const empresaId = empresaInfo?.id; // Asegúrate de que empresaInfo tenga el id
+      if (!empresaId) throw new Error("No se encontró el ID de la empresa");
+  
+      await actualizarEmpresa(updatedData, empresaId); // Pasa el id
       toast.success("Datos actualizados correctamente");
       onClose();
     } catch (err) {
@@ -123,17 +149,11 @@ const ModalEmpresaInfo: React.FC<ModalEmpresaInfoProps> = ({
     try {
       setLoading(true);
       const resultado = await consultarRuc(rucConsulta);
-
-      // Verificar si resultado existe y tiene datos
       if (!resultado || !resultado.ruc) {
         toast.error("No se encontraron datos para este RUC");
         return;
       }
 
-      console.log("Consultando RUC:", rucConsulta);
-      console.log("Resultado de la API:", resultado);
-
-      // Solo actualizar el estado si tenemos datos válidos
       setFormData((prev) => ({
         ...prev,
         ruc: resultado.ruc,
@@ -155,7 +175,7 @@ const ModalEmpresaInfo: React.FC<ModalEmpresaInfoProps> = ({
       }));
 
       toast.success("Datos de RUC obtenidos correctamente");
-      setIsConsultaRucOpen(false); // Cerrar el modal después de obtener los datos
+      setIsConsultaRucOpen(false);
     } catch (error) {
       console.error("Error al consultar RUC:", error);
       toast.error("Error al consultar el RUC");
@@ -222,7 +242,7 @@ const ModalEmpresaInfo: React.FC<ModalEmpresaInfoProps> = ({
                   color="warning"
                   onPress={() => setIsConsultaRucOpen(true)}
                 >
-                  <h2>Registro Rapido</h2>
+                  <h2>Registro Rápido</h2>
                 </Button>
               </div>
             </ModalHeader>
@@ -260,6 +280,42 @@ const ModalEmpresaInfo: React.FC<ModalEmpresaInfoProps> = ({
                     />
                   </div>
                 ))}
+                {/* Nuevos campos para el certificado */}
+                <div className="flex flex-col">
+                  <label htmlFor="certificadoDigital" className="mb-1">
+                    Certificado Digital (.pfx o .cer)
+                  </label>
+                  <input
+                    id="certificadoDigital"
+                    type="file"
+                    accept=".pfx,.cer"
+                    onChange={handleCertFileChange}
+                    className="border rounded p-2"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="clavePrivada" className="mb-1">
+                    Clave Privada (.key, opcional)
+                  </label>
+                  <input
+                    id="clavePrivada"
+                    type="file"
+                    accept=".key"
+                    onChange={handleKeyFileChange}
+                    className="border rounded p-2"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <Input
+                    name="certificadoPassword"
+                    label="Contraseña del Certificado"
+                    placeholder="Ingrese la contraseña (si aplica)"
+                    type="password"
+                    variant="underlined"
+                    value={formData.certificadoPassword ?? ""}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
             </ModalBody>
             <ModalFooter>

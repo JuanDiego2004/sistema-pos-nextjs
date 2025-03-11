@@ -2,8 +2,6 @@ import { Producto } from '@/app/utils/types';
 import prisma from '@/lib/prisma';
 import { NextApiRequest } from 'next';
 import { NextRequest, NextResponse } from 'next/server';
-import { XMLBuilder } from "fast-xml-parser";
-
 
 interface InvoiceDetailRequest {
   productId: string;
@@ -14,9 +12,6 @@ interface InvoiceDetailRequest {
   igvType: string;
 }
 
-
-
-// Define explicit interfaces for type safety
 interface UnidadSeleccionada {
   precioVenta: number;
   unidadMedida: string;
@@ -29,7 +24,6 @@ interface ProductoVenta {
   unidadSeleccionada: UnidadSeleccionada;
   tieneIGV: boolean;
 }
-
 
 interface VentaRequestBody {
   productos: {
@@ -44,7 +38,7 @@ interface VentaRequestBody {
     } | null;
     tieneIGV: boolean;
   }[];
-  clienteId: string | ""; // Ajusta según si es opcional
+  clienteId: string | "";
   usuarioId: string;
   sucursalId: string;
   almacenId: string;
@@ -230,130 +224,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generar el XML
-    const xmlBuilder = new XMLBuilder({
-      ignoreAttributes: false,
-      attributeNamePrefix: "@_",
-      format: true,
-    });
-
-    const xmlData = {
-      Invoice: {
-        "@_xmlns": "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2",
-        "@_xmlns:cac": "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
-        "@_xmlns:cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
-        "@_xmlns:ext": "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2",
-        "ext:UBLExtensions": {
-          "ext:UBLExtension": {
-            "ext:ExtensionContent": "", // Firma digital se añadiría aquí
-          },
-        },
-        "cbc:UBLVersionID": "2.1",
-        "cbc:CustomizationID": "2.0",
-        "cbc:ID": numeroComprobante,
-        "cbc:IssueDate": new Date().toISOString().split("T")[0],
-        "cbc:InvoiceTypeCode": {
-          "@_listID": tipoOperacion,
-          "#text": tipoComprobante,
-        },
-        "cbc:DocumentCurrencyCode": "PEN",
-        "cac:AccountingSupplierParty": {
-          "cac:Party": {
-            "cac:PartyIdentification": {
-              "cbc:ID": { "@_schemeID": "6", "#text": empresa.ruc },
-            },
-            "cac:PartyLegalEntity": {
-              "cbc:RegistrationName": empresa.razonSocial,
-            },
-          },
-        },
-        "cac:AccountingCustomerParty": {
-          "cac:Party": {
-            "cac:PartyIdentification": {
-              "cbc:ID": { "@_schemeID": cliente.tipoDocumento === "RUC" ? "6" : "1", "#text": cliente.numeroDocumento },
-            },
-            "cac:PartyLegalEntity": {
-              "cbc:RegistrationName": cliente.nombre,
-            },
-          },
-        },
-        "cac:LegalMonetaryTotal": {
-          "cbc:LineExtensionAmount": { "@_currencyID": "PEN", "#text": subtotal },
-          "cbc:TaxInclusiveAmount": { "@_currencyID": "PEN", "#text": total },
-          "cbc:PayableAmount": { "@_currencyID": "PEN", "#text": total },
-        },
-        "cac:TaxTotal": {
-          "cbc:TaxAmount": { "@_currencyID": "PEN", "#text": igv },
-          "cac:TaxSubtotal": {
-            "cbc:TaxableAmount": { "@_currencyID": "PEN", "#text": baseImponible },
-            "cbc:TaxAmount": { "@_currencyID": "PEN", "#text": igv },
-            "cac:TaxCategory": {
-              "cac:TaxScheme": {
-                "cbc:ID": "1000",
-                "cbc:Name": "IGV",
-                "cbc:TaxTypeCode": "VAT",
-              },
-            },
-          },
-        },
-        "cac:InvoiceLine": productos.map((producto, index) => ({
-          "cbc:InvoicedQuantity": { "@_unitCode": producto.unidadSeleccionada?.unidadMedida || "NIU", "#text": producto.cantidad },
-          "cbc:LineExtensionAmount": {
-            "@_currencyID": "PEN",
-            "#text": (producto.unidadSeleccionada?.precioVenta || 0) * producto.cantidad,
-          },
-          "cac:Item": {
-            "cbc:Description": producto.nombre || "Producto sin nombre", // Usa el nombre si está disponible
-          },
-          "cac:Price": {
-            "cbc:PriceAmount": { "@_currencyID": "PEN", "#text": producto.unidadSeleccionada?.precioVenta || 0 },
-          },
-          "cac:TaxTotal": producto.tieneIGV
-            ? {
-                "cbc:TaxAmount": {
-                  "@_currencyID": "PEN",
-                  "#text": ((producto.unidadSeleccionada?.precioVenta || 0) * producto.cantidad * 0.18).toFixed(2),
-                },
-                "cac:TaxSubtotal": {
-                  "cbc:TaxableAmount": {
-                    "@_currencyID": "PEN",
-                    "#text": ((producto.unidadSeleccionada?.precioVenta || 0) * producto.cantidad).toFixed(2),
-                  },
-                  "cbc:TaxAmount": {
-                    "@_currencyID": "PEN",
-                    "#text": ((producto.unidadSeleccionada?.precioVenta || 0) * producto.cantidad * 0.18).toFixed(2),
-                  },
-                  "cac:TaxCategory": {
-                    "cbc:Percent": "18",
-                    "cbc:TaxExemptionReasonCode": "10", // Gravado
-                    "cac:TaxScheme": {
-                      "cbc:ID": "1000",
-                      "cbc:Name": "IGV",
-                      "cbc:TaxTypeCode": "VAT",
-                    },
-                  },
-                },
-              }
-            : undefined,
-        })),
-      },
-    };
-
-    const xmlString = xmlBuilder.build(xmlData);
-
-    // Guardar el XML en la base de datos
-    await prisma.preventa.update({
-      where: { id: preventa.id },
-      data: { xml: xmlString },
-    });
-
     return NextResponse.json(
       {
         success: true,
         preventaId: preventa.id,
         numeroComprobante,
         fecha: preventa.fecha,
-        xml: xmlString, // Devolver el XML en la respuesta
       },
       { status: 201 }
     );
@@ -370,29 +246,33 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Obtener todas las preventas con sus relaciones
     const preventas = await prisma.preventa.findMany({
-      orderBy: { fecha: "desc" }, // Ordenar por fecha descendente
-      include: {
-        serieDocumento: true,
-        cliente: true,
-        usuario: true,
-        sucursal: true,
-        almacen: true,
-        detallePreventas: {
-          include: {
-            producto: true, // Incluir datos del producto
-          },
-        },
-        bonificaciones: {
-          include: {
-            producto: true, // Incluir datos del producto
-          },
-        },
-      },
+      orderBy: { fecha: "desc" },
+      select: {
+        id: true,
+        fecha: true,
+        total: true,
+        estado: true,
+        latitud: true,
+        longitud: true,
+        cliente: {
+          select: {
+            id: true,
+            nombre: true,
+          }
+        }
+      }
     });
+
+    // Filtrar solo preventas con coordenadas
+    const preventasConCoordenadas = preventas.filter(
+      p => p.latitud !== null && p.longitud !== null
+    );
+
+    console.log(`Total preventas: ${preventas.length}, Con coordenadas: ${preventasConCoordenadas.length}`);
 
     // Obtener los estados únicos para el filtro
     const estadosUnicos = await prisma.preventa.findMany({
@@ -403,8 +283,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        preventas,
-        estados,
+        preventas: preventasConCoordenadas,
+        estadosSistema: estados,
       },
       { status: 200 }
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableHeader,
@@ -19,6 +19,7 @@ import {
   Selection,
   ChipProps,
   useDisclosure,
+  Spinner,
 } from "@heroui/react";
 import { ArrowDown, Dot, MoreVertical, PlusIcon, Search } from "lucide-react";
 import { Preventa } from "../../../../../utils/types";
@@ -28,7 +29,7 @@ import { usarEmpresaInfo } from "@/app/hooks/usarEmpresa";
 import { generarXML } from "../../nueva-venta/lib/generar-xml";
 import EditarVentaModal from "./editar-ventas/modal-editar-ventas";
 
-// Definir las columnas de la tabla
+
 const columns = [
   { name: "USUARIO", uid: "usuario", sortable: true },
   { name: "CLIENTE", uid: "cliente", sortable: true },
@@ -39,7 +40,6 @@ const columns = [
   { name: "ACCIONES", uid: "actions" },
 ];
 
-// Colores para los estados
 const statusColorMap: Record<string, ChipProps["color"]> = {
   pendiente: "warning",
   pagado: "success",
@@ -49,7 +49,7 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 const INITIAL_VISIBLE_COLUMNS = ["usuario", "cliente", "fecha", "estado", "total", "actions"];
 
 export default function PreventasTable() {
-  // Estados para la tabla
+  const [isMounted, setIsMounted] = useState(false);
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -62,17 +62,11 @@ export default function PreventasTable() {
   const [selectedPreventa, setSelectedPreventa] = React.useState<Preventa | null>(null);
   const [isDetalleModalOpen, setIsDetalleModalOpen] = React.useState(false);
 
-  const { empresaInfo, loading: empresaLoading, error: empresaError } = usarEmpresaInfo();
-
-  const {
-    isOpen: isOpenEditarModal,
-    onOpen: onOpenModalEditar,
-    onOpenChange: onOpenChangeEditarModal,
-  } = useDisclosure();
-  const [selectedPreventaEditar, setSelectedPreventaEditar] = React.useState<Preventa | null>(null);
+  const { empresaInfo } = usarEmpresaInfo();
 
   const {
     preventas: preventasAPI,
+    setPreventas,
     estados,
     totalPaginas,
     pagina,
@@ -85,23 +79,32 @@ export default function PreventasTable() {
     error,
     rowsPerPage: rowsPerPageFromHook,
     setRowsPerPage: setRowsPerPageFromHook,
+    refreshPreventas,
   } = usarPreventas();
 
-  // Usar rowsPerPage del hook para mantener consistencia
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   React.useEffect(() => {
     setRowsPerPageFromHook(rowsPerPage);
   }, [rowsPerPage, setRowsPerPageFromHook]);
 
-  // Sincronizar la página del componente con el hook
   React.useEffect(() => {
     setPagina(page);
   }, [page, setPagina]);
 
-  // Sincronizar los filtros del componente con el hook
   React.useEffect(() => {
     setBusqueda(filterValue);
     setEstado(statusFilter === "all" ? null : Array.from(statusFilter).join(","));
   }, [filterValue, statusFilter, setBusqueda, setEstado]);
+
+  const {
+    isOpen: isOpenEditarModal,
+    onOpen: onOpenModalEditar,
+    onOpenChange: onOpenChangeEditarModal,
+  } = useDisclosure();
+  const [selectedPreventaEditar, setSelectedPreventaEditar] = React.useState<Preventa | null>(null);
 
   const handleEditarVenta = (preventa: Preventa) => {
     setSelectedPreventaEditar(preventa);
@@ -109,7 +112,10 @@ export default function PreventasTable() {
   };
 
   const handleSaveEdit = (updatedPreventa: Preventa) => {
-    console.log("Saving updated preventa:", updatedPreventa);
+    setPreventas((prev) =>
+      prev.map((p) => (p.id === updatedPreventa.id ? updatedPreventa : p))
+    );
+    refreshPreventas();
   };
 
   const handleViewDetails = (preventa: Preventa) => {
@@ -117,13 +123,29 @@ export default function PreventasTable() {
     setIsDetalleModalOpen(true);
   };
 
-  // Usar directamente las preventas paginadas del hook
-  const items = preventasAPI;
 
-  // Total de páginas viene del hook
-  const pages = totalPaginas;
+  const enviarFacturaASunat = async (preventa: Preventa) => {
+    try {
+      const response = await fetch("/api/sunat/enviar-factura", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preventaId: preventa.id }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error al enviar la factura a SUNAT");
+      }
+  
+      const result = await response.json();
+      alert("Factura enviada a SUNAT exitosamente: " + result.message);
+      refreshPreventas();
+    } catch (error) {
+      console.error("Error enviando factura a SUNAT:", error);
+      alert("Error al enviar la factura a SUNAT: " + ((error as any).message || "Desconocido"));
+    }
+  };
 
-  // Renderizado de celdas
+
   const renderCell = React.useCallback(
     (preventa: Preventa, columnKey: React.Key): React.ReactNode => {
       switch (columnKey) {
@@ -174,10 +196,7 @@ export default function PreventasTable() {
           return (
             <div className="flex flex-col">
               <p className="text-bold text-small">
-                $
-                {preventa.total.toLocaleString("es-MX", {
-                  minimumFractionDigits: 2,
-                })}
+                ${preventa.total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
               </p>
             </div>
           );
@@ -192,12 +211,6 @@ export default function PreventasTable() {
                 </DropdownTrigger>
                 <DropdownMenu>
                   <DropdownItem
-                    key={`generarxml-${preventa.id}`}
-                    onPress={() => generarXML(preventa, empresaInfo)}
-                  >
-                    Generar Xml
-                  </DropdownItem>
-                  <DropdownItem
                     key={`editarventa-${preventa.id}`}
                     onPress={() => handleEditarVenta(preventa)}
                   >
@@ -208,6 +221,12 @@ export default function PreventasTable() {
                     onPress={() => handleViewDetails(preventa)}
                   >
                     Ver detalles venta
+                  </DropdownItem>
+                  <DropdownItem
+                    key={`enviar-sunat-${preventa.id}`}
+                    onPress={() => enviarFacturaASunat(preventa)}
+                  >
+                    Enviar a SUNAT
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
@@ -221,10 +240,9 @@ export default function PreventasTable() {
           return value?.toString() || "";
       }
     },
-    []
+    [empresaInfo]
   );
 
-  // Contenido superior de la tabla
   const topContent = React.useMemo(() => {
     return (
       <div className="flex flex-col gap-4">
@@ -242,6 +260,7 @@ export default function PreventasTable() {
             variant="bordered"
             onClear={() => setFilterValue("")}
             onValueChange={(value) => setFilterValue(value)}
+            isDisabled={cargando}
           />
           <div className="flex gap-3">
             <Dropdown>
@@ -250,6 +269,7 @@ export default function PreventasTable() {
                   endContent={<ArrowDown className="text-small" />}
                   size="sm"
                   variant="flat"
+                  isDisabled={cargando}
                 >
                   Estado
                 </Button>
@@ -261,6 +281,7 @@ export default function PreventasTable() {
                 selectedKeys={statusFilter}
                 selectionMode="multiple"
                 onSelectionChange={setStatusFilter}
+                disabledKeys={cargando ? estados : []}
               >
                 {estados.map((estado: any) => (
                   <DropdownItem key={estado} className="capitalize">
@@ -273,6 +294,7 @@ export default function PreventasTable() {
               className="bg-foreground text-background"
               endContent={<PlusIcon />}
               size="sm"
+              isDisabled={cargando}
             >
               Nueva Preventa
             </Button>
@@ -280,9 +302,8 @@ export default function PreventasTable() {
         </div>
       </div>
     );
-  }, [filterValue, estados, statusFilter]);
+  }, [filterValue, estados, statusFilter, cargando]);
 
-  // Contenido inferior de la tabla
   const bottomContent = React.useMemo(() => {
     return (
       <div className="py-2 px-2 flex justify-between items-center">
@@ -296,56 +317,68 @@ export default function PreventasTable() {
           }}
           color="default"
           page={page}
-          total={pages}
+          total={totalPaginas}
           variant="light"
           onChange={(newPage) => setPage(newPage)}
+          isDisabled={cargando}
         />
       </div>
     );
-  }, [page, pages, preventasAPI.length]);
+  }, [page, totalPaginas, preventasAPI.length, cargando]);
 
-  if (cargando) return <div>Cargando...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (!isMounted) {
+    return (
+      <div className="relative w-full overflow-hidden p-4">
+        <div className="flex items-center justify-center h-[382px] bg-gray-100">
+          <Spinner size="lg" color="default" label="Cargando preventas..." />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div className="w-full overflow-hidden p-4">
-        <Table
-          isCompact
-          aria-label="Tabla de Preventas"
-          bottomContent={bottomContent}
-          bottomContentPlacement="outside"
-          classNames={{
-            wrapper: "max-h-[382px]",
-            base: "w-full",
-            table: "w-full",
-          }}
-          selectedKeys={selectedKeys}
-          selectionMode="multiple"
-          topContent={topContent}
-          topContentPlacement="outside"
-          onSelectionChange={setSelectedKeys}
-        >
-          <TableHeader columns={columns}>
-            {(column) => (
-              <TableColumn
-                key={column.uid}
-                align={column.uid === "actions" ? "center" : "start"}
-                allowsSorting={column.sortable}
-              >
-                {column.name}
-              </TableColumn>
-            )}
-          </TableHeader>
-          <TableBody<Preventa> emptyContent={"No se encontraron preventas"} items={items}>
-            {(preventa) => (
-              <TableRow key={preventa.id}>
-                {(columnKey) => <TableCell>{renderCell(preventa, columnKey)}</TableCell>}
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+    <div className="relative w-full overflow-hidden p-4">
+      <Table
+        isCompact
+        aria-label="Tabla de Preventas"
+        bottomContent={bottomContent}
+        bottomContentPlacement="outside"
+        classNames={{
+          wrapper: "max-h-[382px]",
+          base: "w-full",
+          table: "w-full",
+        }}
+        selectedKeys={selectedKeys}
+        selectionMode="multiple"
+        topContent={topContent}
+        topContentPlacement="outside"
+        onSelectionChange={setSelectedKeys}
+      >
+        <TableHeader columns={columns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === "actions" ? "center" : "start"}
+              allowsSorting={column.sortable}
+            >
+              {column.name}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody<Preventa> emptyContent={"No se encontraron preventas"} items={preventasAPI}>
+          {(preventa) => (
+            <TableRow key={preventa.id}>
+              {(columnKey) => <TableCell>{renderCell(preventa, columnKey)}</TableCell>}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      {cargando && (
+        <div className="absolute inset-0 bg-gray-600 bg-opacity-60 flex items-center justify-center z-50">
+          <Spinner size="lg" color="white" label="Cargando preventas..." />
+        </div>
+      )}
 
       <div>
         <EditarVentaModal
@@ -363,6 +396,12 @@ export default function PreventasTable() {
           />
         )}
       </div>
-    </>
+
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-red-100 bg-opacity-80 z-50">
+          <p className="text-red-600 text-lg">Error: {error}</p>
+        </div>
+      )}
+    </div>
   );
 }
